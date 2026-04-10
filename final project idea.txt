@@ -1,0 +1,7 @@
+ý tưởng sản phẩm cuối khóa:
+
+ứng dụng tạo môi trường làm việc:
+- tạo các "profile" (như "Học Python", "Xem phim", "Giải trí" ...)
+  + trong mỗi profile có danh sách những ứng dụng, link website, folder mà người dùng có thể mở cùng một lúc bằng 1 cú click chuột (tạo môi trường làm việc)
+  + có thể đóng / lưu công việc đang làm để chuyển profile ngay lập tức
+  + hẹn giờ profile (ví dụ: khi mở profile "Học bài" tự động đếm ngược 20 phút rồi chuyển sang profile "Nghỉ ngơi" hoặc "Giải trí")
