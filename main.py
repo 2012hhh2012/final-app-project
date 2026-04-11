@@ -98,10 +98,18 @@ class SettingsWindow(QMainWindow):
         super().__init__()
         uic.loadUi("settings.ui", self)
         self.user_manager = user_manager
+        self.loadAppSettings()
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnProfiles.clicked.connect(lambda: openprofiles(self))
         self.btnSideSignOut.clicked.connect(lambda: signout(self))
         self.btnDeleteAccount.clicked.connect(self.deleteAccount)
+        self.btnAppSave.clicked.connect(self.saveAppSettings)
+        self.btnAccountSave.clicked.connect(self.saveAccountCredentials)
+
+    def loadAppSettings(self):
+        if self.user_manager.get_current_user():
+            self.chkLaunchOnStartup.setChecked(self.user_manager.get_current_user()["settings"]["launchOnStartup"])
+            self.chkMinimizeToTray.setChecked(self.user_manager.get_current_user()["settings"]["MinimizeToTray"])
 
     def deleteAccount(self):
         status, message = self.user_manager.delete_user(self.user_manager.get_current_user()["email"])
@@ -109,6 +117,23 @@ class SettingsWindow(QMainWindow):
             opensignup(self)
         else:
             QMessageBox.warning(self, "Warning", message)
+
+    def saveAppSettings(self):
+        self.user_manager.get_current_user()["settings"]["launchOnStartup"] = self.chkLaunchOnStartup.isChecked()
+        self.user_manager.get_current_user()["settings"]["MinimizeToTray"] = self.chkMinimizeToTray.isChecked()
+        self.user_manager.save_users()
+        QMessageBox.information(self, "Success", "App settings saved successfully!")
+
+    def saveAccountCredentials(self):
+        if self.linePassword.text():
+            self.user_manager.get_current_user()["password"] = self.linePassword.text()
+            self.linePassword.clear()
+        if self.lineEmail.text():
+            self.user_manager.get_current_user()["email"] = self.lineEmail.text()
+            self.user_manager.current_user["email"] = self.lineEmail.text()
+            self.lineEmail.clear()
+        self.user_manager.save_users()
+        QMessageBox.information(self, "Success", "Account credentials saved successfully!")
 
 class UserManager:
     def __init__(self, filename="users-data.json"):
@@ -253,19 +278,6 @@ class UserManager:
         self.save_users()
         return True, f"Resource '{resource_name}' removed from '{profile_name}'!"
     
-    def get_all_users(self):
-        """Return the entire users array"""
-        return self.users
-    
-    def update_user(self, username, updated_data):
-        """Update user information"""
-        for i, user in enumerate(self.users):
-            if user["username"] == username:
-                self.users[i].update(updated_data)
-                self.save_users()
-                return True
-        return False
-    
     def delete_user(self, email):
         """Remove user from array. Returns (success, message)"""
         # Find the user
@@ -278,10 +290,6 @@ class UserManager:
                 self.save_users()
                 return True, "Account deleted successfully!"
         return False, "User not found!"
-    
-    def get_user_count(self):
-        """Get total number of users"""
-        return len(self.users)
 
 # Switch ui functions
 def opendashboard(current_window):

@@ -4,7 +4,7 @@
         "password": "20122012",
         "email": "2012hhh2012@2012hhh2012.qzz.io",
         "settings": {
-            "launchOnStartup": false,
+            "launchOnStartup": true,
             "MinimizeToTray": false
         },
         "profiles": {}
