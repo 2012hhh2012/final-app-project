@@ -16,7 +16,7 @@ class SigninWindow(QMainWindow):
 
     def Signin(self):
         if self.linePassword.text() and self.lineEmail.text():
-            status, message = UserManager().verify_user(self.lineEmail.text(), self.linePassword.text())
+            status, message = self.user_manager.verify_user(self.lineEmail.text(), self.linePassword.text())
             if status:
                 self.clearInputs()
                 opendashboard(self)
@@ -46,7 +46,7 @@ class SignupWindow(QMainWindow):
 
     def Signup(self):
         if self.linePassword.text() and self.lineUsername.text() and self.lineEmail.text():
-            status, message = UserManager().add_user(self.lineUsername.text(), self.linePassword.text(), self.lineEmail.text())
+            status, message = self.user_manager.add_user(self.lineUsername.text(), self.linePassword.text(), self.lineEmail.text())
             if status:
                 self.clearInputs()
                 opendashboard(self)
@@ -104,8 +104,7 @@ class SettingsWindow(QMainWindow):
         self.btnDeleteAccount.clicked.connect(self.deleteAccount)
 
     def deleteAccount(self):
-        print(UserManager().get_current_user())
-        status, message = UserManager().delete_user(UserManager().get_current_user()["email"])
+        status, message = self.user_manager.delete_user(self.user_manager.get_current_user()["email"])
         if status:
             opensignup(self)
         else:
@@ -162,6 +161,7 @@ class UserManager:
         # Add to array
         self.users.append(new_user)
         self.save_users()
+        self.current_user = new_user
         return True, "User created successfully!"
     
     def find_user_by_email(self, email):
@@ -267,13 +267,17 @@ class UserManager:
         return False
     
     def delete_user(self, email):
-        """Remove user from array"""
+        """Remove user from array. Returns (success, message)"""
+        # Find the user
         for i, user in enumerate(self.users):
-            if user["email"] == email:
+            if user["email"].lower() == email.lower():
+                # If the deleted user is the current user, log them out
+                if self.current_user and self.current_user["email"].lower() == email.lower():
+                    self.current_user = None
                 del self.users[i]
                 self.save_users()
-                return True
-        return False
+                return True, "Account deleted successfully!"
+        return False, "User not found!"
     
     def get_user_count(self):
         """Get total number of users"""

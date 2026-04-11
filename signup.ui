@@ -23,9 +23,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: #131313;
-QMessageBox QLabel {
-	color:white;
-}</string>
+color: white;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_3">
