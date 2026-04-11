@@ -5,9 +5,10 @@ import json
 import os
 
 class SigninWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("signin.ui", self)
+        self.user_manager = user_manager
         self.btnSignUp.clicked.connect(lambda: opensignup(self))
         self.btnSignIn.clicked.connect(self.Signin)
         self.btnGoogle.clicked.connect(self.showUnavailable)
@@ -34,9 +35,10 @@ class SigninWindow(QMainWindow):
         QMessageBox.information(self, "Sorry", "This Signin method is unavailable.")
 
 class SignupWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("signup.ui", self)
+        self.user_manager = user_manager
         self.btnSignIn.clicked.connect(lambda: opensignin(self))
         self.btnSignUp.clicked.connect(self.Signup)
         self.btnGoogle.clicked.connect(self.showUnavailable)
@@ -64,37 +66,50 @@ class SignupWindow(QMainWindow):
         QMessageBox.information(self, "Sorry", "This Signup method is unavailable.")
 
 class DashboardWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("dashboard.ui", self)
+        self.user_manager = user_manager
         self.btnProfiles.clicked.connect(lambda: openprofiles(self))
         self.btnSettings.clicked.connect(lambda: opensettings(self))
         self.btnSignOut.clicked.connect(lambda: signout(self))
 
 class ProfilesWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("profiles.ui", self)
+        self.user_manager = user_manager
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnSettings.clicked.connect(lambda: opensettings(self))
         self.btnSignOut.clicked.connect(lambda: signout(self))
 
 class EditProfileWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("editprofile.ui", self)
+        self.user_manager = user_manager
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnSettings.clicked.connect(lambda: opensettings(self))
         self.btnProfiles.clicked.connect(lambda: openprofiles(self))
         self.btnSignOut.clicked.connect(lambda: signout(self))
 
 class SettingsWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("settings.ui", self)
+        self.user_manager = user_manager
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnProfiles.clicked.connect(lambda: openprofiles(self))
         self.btnSideSignOut.clicked.connect(lambda: signout(self))
+        self.btnDeleteAccount.clicked.connect(self.deleteAccount)
+
+    def deleteAccount(self):
+        print(UserManager().get_current_user())
+        status, message = UserManager().delete_user(UserManager().get_current_user()["email"])
+        if status:
+            opensignup(self)
+        else:
+            QMessageBox.warning(self, "Warning", message)
 
 class UserManager:
     def __init__(self, filename="users-data.json"):
@@ -177,9 +192,10 @@ class UserManager:
         
         # Set current user
         self.current_user = user
+        print(self.current_user)
         return True, f"Welcome {user['username']}!"
     
-    def Signout(self):
+    def signout(self):
         self.current_user = None
     
     def get_user_profiles(self, email):
@@ -250,10 +266,10 @@ class UserManager:
                 return True
         return False
     
-    def delete_user(self, username):
+    def delete_user(self, email):
         """Remove user from array"""
         for i, user in enumerate(self.users):
-            if user["username"] == username:
+            if user["email"] == email:
                 del self.users[i]
                 self.save_users()
                 return True
@@ -266,45 +282,52 @@ class UserManager:
 # Switch ui functions
 def opendashboard(current_window):
     global dashboardwindow
+    dashboardwindow = DashboardWindow(current_window.user_manager)
     dashboardwindow.show()
     current_window.close()
 
 def opensignin(current_window):
     global signinwindow
+    signinwindow = SigninWindow(current_window.user_manager)
     signinwindow.show()
     current_window.close()
 
 def opensignup(current_window):
     global signupwindow
+    signupwindow = SignupWindow(current_window.user_manager)
     signupwindow.show()
     current_window.close()
 
 def openprofiles(current_window):
     global profileswindow
+    profileswindow = ProfilesWindow(current_window.user_manager)
     profileswindow.show()
     current_window.close()
 
 def opensettings(current_window):
     global settingswindow
+    settingswindow = SettingsWindow(current_window.user_manager)
     settingswindow.show()
     current_window.close()
 
 def openeditprofile(current_window):
     global editprofilewindow
+    editprofilewindow = EditProfileWindow(current_window.user_manager)
     editprofilewindow.show()
     current_window.close()
 
 def signout(current_window):
-    UserManager().Signout()
+    UserManager().signout()
     opensignin(current_window)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    signupwindow = SignupWindow()
-    signinwindow = SigninWindow()
-    dashboardwindow = DashboardWindow()
-    profileswindow = ProfilesWindow()
-    editprofilewindow = EditProfileWindow()
-    settingswindow = SettingsWindow()
+    user_manager = UserManager("users-data.json")
+    signupwindow = SignupWindow(user_manager)
+    signinwindow = SigninWindow(user_manager)
+    dashboardwindow = DashboardWindow(user_manager)
+    profileswindow = ProfilesWindow(user_manager)
+    editprofilewindow = EditProfileWindow(user_manager)
+    settingswindow = SettingsWindow(user_manager)
     signinwindow.show()
     app.exec()
