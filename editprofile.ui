@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>840</width>
+    <width>796</width>
     <height>602</height>
    </rect>
   </property>
@@ -51,7 +51,9 @@ color: white;</string>
                 </font>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: #d4d1d0;</string>
+                <string notr="true">color: #d4d1d0;
+font-weight: bold;
+</string>
                </property>
                <property name="text">
                 <string>VibeDock</string>
@@ -89,7 +91,7 @@ QPushButton {
     border-radius: 8px;
     color: #b8bccb;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: bold;
     text-align: left;
     padding: 12px 16px;
     icon-size: 20px;
@@ -123,7 +125,7 @@ QPushButton:hover {
     border-radius: 8px;
     color: #abc4fc;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: bold;
     text-align: left;
     padding: 12px 16px;
     icon-size: 20px;
@@ -153,7 +155,7 @@ QPushButton {
     border-radius: 8px;
     color: #b8bccb;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: bold;
     text-align: left;
     padding: 12px 16px;
     icon-size: 20px;
@@ -302,7 +304,9 @@ QPushButton:pressed {
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: white;</string>
+          <string notr="true">color: white;
+font-weight: bold;
+</string>
          </property>
          <property name="text">
           <string>Learn Python</string>
@@ -319,7 +323,9 @@ QPushButton:pressed {
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: white;</string>
+          <string notr="true">color: white;
+font-weight: bold;
+</string>
          </property>
          <property name="text">
           <string>Resources</string>
@@ -336,6 +342,55 @@ QPushButton:pressed {
               <width>200</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QListWidget {
+    background-color: #2b2b2b;
+    border: 1px solid #3c3c3c;
+    border-radius: 5px;
+    font-size: 13px;
+    color: #e0e0e0;
+    outline: none;
+}
+
+QListWidget::item {
+    padding: 10px;
+    margin: 2px 5px;
+    border-radius: 4px;
+    background-color: #333333;
+}
+
+QListWidget::item:hover {
+    background-color: #3c3c3c;
+}
+
+QListWidget::item:selected {
+    background-color: #0d7377;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Scrollbar styling for dark theme */
+QScrollBar:vertical {
+    background-color: #2b2b2b;
+    width: 12px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #555555;
+    border-radius: 6px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #0d7377;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}</string>
             </property>
            </widget>
           </item>
@@ -396,6 +451,12 @@ QPushButton:pressed {
                <layout class="QHBoxLayout" name="horizontalLayout">
                 <item>
                  <widget class="QLabel" name="label_9">
+                  <property name="minimumSize">
+                   <size>
+                    <width>60</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="font">
                    <font>
                     <pointsize>10</pointsize>
@@ -612,7 +673,7 @@ QPushButton:pressed {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>840</width>
+     <width>796</width>
      <height>21</height>
     </rect>
    </property>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>805</width>
-    <height>634</height>
+    <width>751</width>
+    <height>692</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -51,7 +51,8 @@ color: white;</string>
                 </font>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: #d4d1d0;</string>
+                <string notr="true">color: #d4d1d0;
+font-weight: bold;</string>
                </property>
                <property name="text">
                 <string>VibeDock</string>
@@ -89,7 +90,7 @@ QPushButton {
     border-radius: 8px;
     color: #b8bccb;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: bold;
     text-align: left;
     padding: 12px 16px;
     icon-size: 20px;
@@ -124,7 +125,7 @@ QPushButton {
     border-radius: 8px;
     color: #b8bccb;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: bold;
     text-align: left;
     padding: 12px 16px;
     icon-size: 20px;
@@ -158,7 +159,7 @@ QPushButton:hover {
     border-radius: 8px;
     color: #abc4fc;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: bold;
     text-align: left;
     padding: 12px 16px;
     icon-size: 20px;
@@ -404,6 +405,85 @@ QPushButton:pressed {
             </layout>
            </widget>
           </item>
+          <item>
+           <widget class="QWidget" name="widget_11" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>70</width>
+                 <height>16</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnAppSave">
+               <property name="maximumSize">
+                <size>
+                 <width>200</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>9</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #adc6ff, stop:1 #4d8eff);
+    color: #00285d;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 10px;
+    border: none;
+}
+
+QPushButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #c2d5ff, stop:1 #66a1ff);
+    color: #001a3d;
+}
+
+QPushButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #8aa9ff, stop:1 #3b76e0);
+    padding-left: 12px;
+    padding-top: 12px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Save</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>70</width>
+                 <height>16</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -484,7 +564,7 @@ QPushButton:pressed {
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="linePassword_2">
+              <widget class="QLineEdit" name="lineEmail">
                <property name="styleSheet">
                 <string notr="true">color: white;</string>
                </property>
@@ -545,7 +625,7 @@ QPushButton:pressed {
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btnSave">
+              <widget class="QPushButton" name="btnAccountSave">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -621,6 +701,13 @@ QPushButton:pressed {
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="font">
+                <font>
+                 <pointsize>9</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
                <property name="styleSheet">
                 <string notr="true">QPushButton {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #ff0000, stop:0.5 #cc0000, stop:1 #990000);
@@ -695,7 +782,7 @@ QPushButton:pressed {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>805</width>
+     <width>751</width>
      <height>21</height>
     </rect>
    </property>

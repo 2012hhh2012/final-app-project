@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QInputDialog
 from PyQt6 import uic
 import sys
 import json
@@ -79,19 +79,61 @@ class ProfilesWindow(QMainWindow):
         super().__init__()
         uic.loadUi("profiles.ui", self)
         self.user_manager = user_manager
+        self.loadProfiles()
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnSettings.clicked.connect(lambda: opensettings(self))
         self.btnSignOut.clicked.connect(lambda: signout(self))
+        self.btnAddProfile.clicked.connect(self.addProfile)
+        self.btnLaunch.clicked.connect(self.launchProfile)
+        self.btnEdit.clicked.connect(self.editProfile)
+    
+    def loadProfiles(self):
+        if self.user_manager.get_current_user():
+            self.listProfiles.clear()
+            for profile in user_manager.get_current_user_profiles():
+                self.listProfiles.addItem(profile)
+
+    def addProfile(self):
+        profile_name, ok = QInputDialog.getText(self, "Add Profile", "Enter profile name:")
+        if ok and profile_name:
+            status, message = self.user_manager.add_profile_to_current_user(profile_name)
+            if status:
+                openeditprofile(self, profile_name)
+            else:
+                QMessageBox.warning(self, "Warning", message)
+
+    def launchProfile(self):
+        if self.listProfiles.currentItem():
+            pass
+            # openeditprofile(self, self.listProfiles.currentItem().text())
+        else:
+            QMessageBox.warning(self, "Warning", "Please select a profile to launch.")
+
+    def editProfile(self):
+        if self.listProfiles.currentItem():
+            openeditprofile(self, self.listProfiles.currentItem().text())
+        else:
+            QMessageBox.warning(self, "Warning", "Please select a profile to edit.")
 
 class EditProfileWindow(QMainWindow):
-    def __init__(self, user_manager):
+    def __init__(self, user_manager, profile_name):
         super().__init__()
         uic.loadUi("editprofile.ui", self)
         self.user_manager = user_manager
+        self.profile_name = profile_name
+        self.loadProfile()
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnSettings.clicked.connect(lambda: opensettings(self))
         self.btnProfiles.clicked.connect(lambda: openprofiles(self))
         self.btnSignOut.clicked.connect(lambda: signout(self))
+
+    def loadProfile(self):
+        if self.user_manager.get_current_user():
+            self.lblProfileName.setText(self.profile_name)
+            self.lblHeadingProfileName.setText(self.profile_name)
+            self.listResources.clear()
+            for resource in self.user_manager.get_current_user_profile_resources(self.profile_name):
+                self.listResources.addItem(resource)
 
 class SettingsWindow(QMainWindow):
     def __init__(self, user_manager):
@@ -146,15 +188,25 @@ class UserManager:
         return self.current_user
     
     def load_users(self):
-        """Load users array from JSON file"""
+        """Load users array from JSON file, create if doesn't exist"""
         if os.path.exists(self.filename):
             try:
                 with open(self.filename, "r") as file:
                     self.users = json.load(file)
-            except:
+                print(f"Loaded {len(self.users)} users from {self.filename}")
+            except json.JSONDecodeError:
+                print(f"Error reading {self.filename}, creating new file")
                 self.users = []
+                self.save_users()
+            except Exception as e:
+                print(f"Error loading users: {e}")
+                self.users = []
+                self.save_users()
         else:
+            # File doesn't exist, create it with empty array
+            print(f"{self.filename} not found, creating new file")
             self.users = []
+            self.save_users()
     
     def save_users(self):
         """Save users array to JSON file"""
@@ -223,27 +275,50 @@ class UserManager:
     def signout(self):
         self.current_user = None
     
-    def get_user_profiles(self, email):
-        """Get all profiles for a user"""
-        user = self.find_user_by_email(email)
-        if user:
-            return user.get("profiles", {})
-        return None
-    
     def get_current_user_profiles(self):
         """Get profiles for currently logged in user"""
         if self.current_user:
             return self.current_user.get("profiles", {})
         return None
     
-    def get_profile_resources(self, email, profile_name):
+    def add_profile_to_current_user(self, profile_name):
+        """Add a new profile to the currently logged in user"""
+        # Check if user is logged in
+        user = self.current_user
+        if not user:
+            return False, "No user is currently logged in!"
+        
+        # Initialize profiles dict if it doesn't exist
+        if "profiles" not in user:
+            user["profiles"] = {}
+        
+        # Check if profile already exists
+        if profile_name in user["profiles"]:
+            return False, f"Profile '{profile_name}' already exists!"
+        
+        # Add the new profile with empty resources array
+        user["profiles"][profile_name] = []
+        
+        # Update current_user reference
+        self.current_user = user
+        
+        # Save to file
+        self.save_users()
+        
+        return True, f"Profile '{profile_name}' created successfully!"
+
+    def get_current_user_profile_resources(self, profile_name):
         """Get all resources in a specific profile"""
-        user = self.find_user_by_email(email)
+        user = self.current_user
         if not user:
             return None
         
         profiles = user.get("profiles", {})
         return profiles.get(profile_name, [])
+    
+    def add_resource_to_current_user_profile(self, profile_name, resource_name):
+        """Add a resource to the currently logged in user's profile"""
+        return self.add_resource_to_profile(self.current_user["email"], profile_name, resource_name)
     
     def add_resource_to_profile(self, email, profile_name, resource_name):
         """Add a resource to a profile's array"""
@@ -261,6 +336,10 @@ class UserManager:
         user["profiles"][profile_name].append(resource_name)
         self.save_users()
         return True, f"Resource '{resource_name}' added to '{profile_name}'!"
+    
+    def remove_resource_from_current_user_profile(self, profile_name, resource_name):
+        """Remove a resource from the currently logged in user's profile"""
+        return self.remove_resource_from_profile(self.current_user["email"], profile_name, resource_name)
     
     def remove_resource_from_profile(self, email, profile_name, resource_name):
         """Remove a resource from a profile's array"""
@@ -322,9 +401,9 @@ def opensettings(current_window):
     settingswindow.show()
     current_window.close()
 
-def openeditprofile(current_window):
+def openeditprofile(current_window, profile_name):
     global editprofilewindow
-    editprofilewindow = EditProfileWindow(current_window.user_manager)
+    editprofilewindow = EditProfileWindow(current_window.user_manager, profile_name)
     editprofilewindow.show()
     current_window.close()
 
@@ -339,7 +418,7 @@ if __name__ == "__main__":
     signinwindow = SigninWindow(user_manager)
     dashboardwindow = DashboardWindow(user_manager)
     profileswindow = ProfilesWindow(user_manager)
-    editprofilewindow = EditProfileWindow(user_manager)
+    editprofilewindow = EditProfileWindow(user_manager, None)
     settingswindow = SettingsWindow(user_manager)
     signinwindow.show()
     app.exec()
