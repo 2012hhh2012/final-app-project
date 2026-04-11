@@ -1,1 +1,1 @@
-# my super cool final mindx app project
+# my super cool final app project
