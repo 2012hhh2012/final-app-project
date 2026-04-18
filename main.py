@@ -107,7 +107,7 @@ class DashboardWindow(QMainWindow):
     def launchProfile(self):
         if self.listQuickAccess.currentItem():
             self.user_manager.push_quick_access_profile_of_current_user(self.listQuickAccess.currentItem().text())
-            launch_resources(self.user_manager.get_current_user_profile_resources(self.listQuickAccess.currentItem().text()))
+            launch_resources(self, self.user_manager.get_current_user_profile_resources(self.listQuickAccess.currentItem().text()))
             self.loadQuickAccess()
         else:
             QMessageBox.warning(self, "Warning", "Please select a profile to launch.")
@@ -153,7 +153,7 @@ class ProfilesWindow(QMainWindow):
     def launchProfile(self):
         if self.listProfiles.currentItem():
             self.user_manager.push_quick_access_profile_of_current_user(self.listProfiles.currentItem().text())
-            launch_resources(self.user_manager.get_current_user_profile_resources(self.listProfiles.currentItem().text()))
+            launch_resources(self, self.user_manager.get_current_user_profile_resources(self.listProfiles.currentItem().text()))
         else:
             QMessageBox.warning(self, "Warning", "Please select a profile to launch.")
 
@@ -575,10 +575,17 @@ def signout(current_window):
     opensignin(current_window)
 
 # Helper
+def is_valid_resource(resource):
+    return resource.startswith(("http://", "https://")) or os.path.exists(resource)
+
 def smart_open(target):
     # 1. URL
     if target.startswith(("http://", "https://")):
         webbrowser.open(target)
+        return True, ""
+
+    if not is_valid_resource(target):
+        return False, "Invalid resource!"
     
     # 2. File or Folder
     else:
@@ -589,9 +596,15 @@ def smart_open(target):
         else: # Linux
             subprocess.Popen(["xdg-open", target])
 
-def launch_resources(resources):
+        return True, ""
+
+def launch_resources(current_window, resources):
+    fail_resources = []
     for resource in resources:
-        smart_open(resource)
+        status, message = smart_open(resource)
+        if not status:
+            fail_resources.append(resource)
+    QMessageBox.warning(current_window, "Warning", f"Failed to open the following resources:\n{'\n'.join(fail_resources)}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
