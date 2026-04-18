@@ -378,21 +378,6 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     background: none;
 }</string>
          </property>
-         <item>
-          <property name="text">
-           <string>Learn Python</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Editing</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Play Games</string>
-          </property>
-         </item>
         </widget>
        </item>
        <item>
