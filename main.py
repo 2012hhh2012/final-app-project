@@ -11,6 +11,7 @@ class SigninWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("signin.ui", self)
+        self.setWindowTitle("VibeDock - Signin")
         self.user_manager = user_manager
         self.btnSignUp.clicked.connect(lambda: opensignup(self))
         self.btnSignIn.clicked.connect(self.Signin)
@@ -41,6 +42,7 @@ class SignupWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("signup.ui", self)
+        self.setWindowTitle("VibeDock - Signup")
         self.user_manager = user_manager
         self.btnSignIn.clicked.connect(lambda: opensignin(self))
         self.btnSignUp.clicked.connect(self.Signup)
@@ -72,6 +74,7 @@ class DashboardWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("dashboard.ui", self)
+        self.setWindowTitle("VibeDock - Dashboard")
         self.user_manager = user_manager
         self.loadQuickAccess()
         self.lblUsername.setText(f"Username: {self.user_manager.get_current_username()}")
@@ -106,6 +109,7 @@ class ProfilesWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("profiles.ui", self)
+        self.setWindowTitle("VibeDock - Profiles")
         self.user_manager = user_manager
         self.loadProfiles()
         self.lblUsername.setText(f"Username: {self.user_manager.get_current_username()}")
@@ -160,6 +164,7 @@ class EditProfileWindow(QMainWindow):
     def __init__(self, user_manager, profile_name):
         super().__init__()
         uic.loadUi("editprofile.ui", self)
+        self.setWindowTitle(f"VibeDock - Editing profile: {profile_name}")
         self.resources = []
         self.settings = {}
         self.user_manager = user_manager
@@ -221,6 +226,7 @@ class SettingsWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
         uic.loadUi("settings.ui", self)
+        self.setWindowTitle("VibeDock - Settings")
         self.user_manager = user_manager
         self.loadAppSettings()
         self.lblUsername.setText(f"Username: {self.user_manager.get_current_username()}")
@@ -518,10 +524,10 @@ def smart_open(target):
     else:
         if platform.system() == "Windows":
             os.startfile(target)
-        elif platform.system() == "Darwin": # macOS
-            subprocess.Popen(["open", target])
-        else: # Linux
-            subprocess.Popen(["xdg-open", target])
+        # elif platform.system() == "Darwin": # macOS
+        #     subprocess.Popen(["open", target])
+        # else: # Linux
+        #     subprocess.Popen(["xdg-open", target])
 
 def launch_resources(resources):
     for resource in resources:
