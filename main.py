@@ -3,6 +3,9 @@ from PyQt6 import uic
 import sys
 import json
 import os
+import webbrowser
+import platform
+import subprocess
 
 class SigninWindow(QMainWindow):
     def __init__(self, user_manager):
@@ -70,9 +73,34 @@ class DashboardWindow(QMainWindow):
         super().__init__()
         uic.loadUi("dashboard.ui", self)
         self.user_manager = user_manager
+        self.loadQuickAccess()
+        self.lblUsername.setText(f"Username: {self.user_manager.get_current_username()}")
         self.btnProfiles.clicked.connect(lambda: openprofiles(self))
         self.btnSettings.clicked.connect(lambda: opensettings(self))
         self.btnSignOut.clicked.connect(lambda: signout(self))
+        self.btnLaunch.clicked.connect(self.launchProfile)
+        self.btnEdit.clicked.connect(self.editProfile)
+
+    def loadQuickAccess(self):
+        if self.user_manager.get_current_user():
+            self.listQuickAccess.clear()
+            if self.user_manager.get_current_user().get("quickaccess"):
+                for profile in user_manager.get_current_user().get("quickaccess"):
+                    self.listQuickAccess.addItem(profile)
+
+    def launchProfile(self):
+        if self.listQuickAccess.currentItem():
+            self.user_manager.push_quick_access_profile_of_current_user(self.listQuickAccess.currentItem().text())
+            launch_resources(self.user_manager.get_current_user_profile_resources(self.listQuickAccess.currentItem().text()))
+        else:
+            QMessageBox.warning(self, "Warning", "Please select a profile to launch.")
+
+    def editProfile(self):
+        if self.listQuickAccess.currentItem():
+            self.user_manager.push_quick_access_profile_of_current_user(self.listQuickAccess.currentItem().text())
+            openeditprofile(self, self.listQuickAccess.currentItem().text())
+        else:
+            QMessageBox.warning(self, "Warning", "Please select a profile to edit.")
 
 class ProfilesWindow(QMainWindow):
     def __init__(self, user_manager):
@@ -80,12 +108,14 @@ class ProfilesWindow(QMainWindow):
         uic.loadUi("profiles.ui", self)
         self.user_manager = user_manager
         self.loadProfiles()
+        self.lblUsername.setText(f"Username: {self.user_manager.get_current_username()}")
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnSettings.clicked.connect(lambda: opensettings(self))
         self.btnSignOut.clicked.connect(lambda: signout(self))
         self.btnAddProfile.clicked.connect(self.addProfile)
         self.btnLaunch.clicked.connect(self.launchProfile)
         self.btnEdit.clicked.connect(self.editProfile)
+        self.btnDelete.clicked.connect(self.deleteProfile)
     
     def loadProfiles(self):
         if self.user_manager.get_current_user():
@@ -104,8 +134,8 @@ class ProfilesWindow(QMainWindow):
 
     def launchProfile(self):
         if self.listProfiles.currentItem():
-            pass
-            # openeditprofile(self, self.listProfiles.currentItem().text())
+            self.user_manager.push_quick_access_profile_of_current_user(self.listProfiles.currentItem().text())
+            launch_resources(self.user_manager.get_current_user_profile_resources(self.listProfiles.currentItem().text()))
         else:
             QMessageBox.warning(self, "Warning", "Please select a profile to launch.")
 
@@ -115,25 +145,77 @@ class ProfilesWindow(QMainWindow):
         else:
             QMessageBox.warning(self, "Warning", "Please select a profile to edit.")
 
+    def deleteProfile(self):
+        if self.listProfiles.currentItem():
+            status, message = self.user_manager.delete_current_user_profile(self.listProfiles.currentItem().text())
+            if status:
+                self.user_manager.get_current_user()["quickaccess"].remove(self.listProfiles.currentItem().text())
+                self.loadProfiles()
+            else:
+                QMessageBox.warning(self, "Warning", message)
+        else:
+            QMessageBox.warning(self, "Warning", "Please select a profile to delete.")
+
 class EditProfileWindow(QMainWindow):
     def __init__(self, user_manager, profile_name):
         super().__init__()
         uic.loadUi("editprofile.ui", self)
+        self.resources = []
+        self.settings = {}
         self.user_manager = user_manager
         self.profile_name = profile_name
         self.loadProfile()
+        self.lblUsername.setText(f"Username: {self.user_manager.get_current_username()}")
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnSettings.clicked.connect(lambda: opensettings(self))
         self.btnProfiles.clicked.connect(lambda: openprofiles(self))
         self.btnSignOut.clicked.connect(lambda: signout(self))
+        self.btnDeleteProfile.clicked.connect(self.deleteProfile)
+        self.btnSave.clicked.connect(self.saveProfile)
+        self.btnAddResource.clicked.connect(self.addResource)
+        self.btnDeleteResource.clicked.connect(self.deleteResource)
+
+    def addResource(self):
+        resource, ok = QInputDialog.getText(self, "Add Resource", "Enter resource (file path, url):")
+        if ok and resource:
+            self.resources.append(resource)
+            self.listResources.addItem(resource)
+
+    def deleteResource(self):
+        if self.listResources.currentItem():
+            self.resources.remove(self.listResources.currentItem().text())
+            self.listResources.takeItem(self.listResources.currentRow())
+        else:
+            QMessageBox.warning(self, "Warning", "Please select a resource to delete.")
 
     def loadProfile(self):
         if self.user_manager.get_current_user():
+            self.user_manager.push_quick_access_profile_of_current_user(self.profile_name)
             self.lblProfileName.setText(self.profile_name)
             self.lblHeadingProfileName.setText(self.profile_name)
             self.listResources.clear()
-            for resource in self.user_manager.get_current_user_profile_resources(self.profile_name):
+            self.settings = self.user_manager.get_current_user_profile(self.profile_name).get("settings", {})
+            self.chkFocusTimer.setChecked(self.settings.get("focus_timer", False))
+            self.lineDuration.setText(str(self.settings.get("duration", 0)))
+            self.resources = self.user_manager.get_current_user_profile_resources(self.profile_name)
+            for resource in self.resources:
                 self.listResources.addItem(resource)
+
+    def deleteProfile(self):
+        status, message = self.user_manager.delete_current_user_profile(self.profile_name)
+        if status:
+            self.user_manager.get_current_user()["quickaccess"].remove(self.profile_name)
+            openprofiles(self)
+        else:
+            QMessageBox.warning(self, "Warning", message)
+
+    def saveProfile(self):
+        self.settings = {"focus_timer": self.chkFocusTimer.isChecked(), "duration": int(self.lineDuration.text())}
+        status, message = self.user_manager.update_current_user_profile(self.profile_name, self.resources, self.settings)
+        if status:
+            openprofiles(self)
+        else:
+            QMessageBox.warning(self, "Warning", message)
 
 class SettingsWindow(QMainWindow):
     def __init__(self, user_manager):
@@ -141,6 +223,7 @@ class SettingsWindow(QMainWindow):
         uic.loadUi("settings.ui", self)
         self.user_manager = user_manager
         self.loadAppSettings()
+        self.lblUsername.setText(f"Username: {self.user_manager.get_current_username()}")
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnProfiles.clicked.connect(lambda: openprofiles(self))
         self.btnSideSignOut.clicked.connect(lambda: signout(self))
@@ -187,6 +270,11 @@ class UserManager:
     def get_current_user(self):
         return self.current_user
     
+    def get_current_username(self):
+        if self.current_user:
+            return self.current_user.get("username")
+        return None
+    
     def load_users(self):
         """Load users array from JSON file, create if doesn't exist"""
         if os.path.exists(self.filename):
@@ -232,7 +320,8 @@ class UserManager:
                 "launchOnStartup": False,
                 "MinimizeToTray": False
             },
-            "profiles": {}
+            "profiles": {},
+            "quickaccess": []
         }
         
         # Add to array
@@ -240,6 +329,15 @@ class UserManager:
         self.save_users()
         self.current_user = new_user
         return True, "User created successfully!"
+
+    def push_quick_access_profile_of_current_user(self, profile_name):
+        if self.current_user.get("quickaccess"):
+            if profile_name in self.current_user["quickaccess"]:
+                self.current_user["quickaccess"].remove(profile_name)
+        else:
+            self.current_user["quickaccess"] = []
+        self.current_user["quickaccess"].insert(0, profile_name)
+        self.save_users()
     
     def find_user_by_email(self, email):
         """Find user by email in the array"""
@@ -297,7 +395,13 @@ class UserManager:
             return False, f"Profile '{profile_name}' already exists!"
         
         # Add the new profile with empty resources array
-        user["profiles"][profile_name] = []
+        user["profiles"][profile_name] = {
+            "resources": [],
+            "settings": {
+                "focus_timer": False,
+                "duration": 0
+            }
+        }
         
         # Update current_user reference
         self.current_user = user
@@ -307,55 +411,48 @@ class UserManager:
         
         return True, f"Profile '{profile_name}' created successfully!"
 
+    def delete_current_user_profile(self, profile_name):
+        """Delete a profile from the currently logged in user"""
+        user = self.current_user
+        if not user:
+            return False, "No user is currently logged in!"
+        
+        if profile_name not in user.get("profiles", {}):
+            return False, f"Profile '{profile_name}' not found!"
+        
+        del user["profiles"][profile_name]
+        self.save_users()
+        return True, f"Profile '{profile_name}' deleted successfully!"
+
     def get_current_user_profile_resources(self, profile_name):
         """Get all resources in a specific profile"""
         user = self.current_user
         if not user:
             return None
         
+        profile = user.get("profiles", {}).get(profile_name, {})
+        return profile.get("resources", [])
+    
+    def update_current_user_profile(self, profile_name, resource_list, settings):
+        user = self.current_user
+        if not user:
+            return False, "No user is currently logged in!"
+        
+        if profile_name not in user.get("profiles", {}):
+            return False, f"Profile '{profile_name}' not found!"
+        
+        user["profiles"][profile_name]["resources"] = resource_list
+        user["profiles"][profile_name]["settings"] = settings
+        self.save_users()
+        return True, f"Profile '{profile_name}' updated successfully!"
+    
+    def get_current_user_profile(self, profile_name):
+        user = self.current_user
+        if not user:
+            return None
+        
         profiles = user.get("profiles", {})
-        return profiles.get(profile_name, [])
-    
-    def add_resource_to_current_user_profile(self, profile_name, resource_name):
-        """Add a resource to the currently logged in user's profile"""
-        return self.add_resource_to_profile(self.current_user["email"], profile_name, resource_name)
-    
-    def add_resource_to_profile(self, email, profile_name, resource_name):
-        """Add a resource to a profile's array"""
-        user = self.find_user_by_email(email)
-        if not user:
-            return False, "User not found!"
-        
-        if profile_name not in user.get("profiles", {}):
-            return False, f"Profile '{profile_name}' not found!"
-        
-        # Check if resource already exists
-        if resource_name in user["profiles"][profile_name]:
-            return False, f"Resource '{resource_name}' already exists in profile!"
-        
-        user["profiles"][profile_name].append(resource_name)
-        self.save_users()
-        return True, f"Resource '{resource_name}' added to '{profile_name}'!"
-    
-    def remove_resource_from_current_user_profile(self, profile_name, resource_name):
-        """Remove a resource from the currently logged in user's profile"""
-        return self.remove_resource_from_profile(self.current_user["email"], profile_name, resource_name)
-    
-    def remove_resource_from_profile(self, email, profile_name, resource_name):
-        """Remove a resource from a profile's array"""
-        user = self.find_user_by_email(email)
-        if not user:
-            return False, "User not found!"
-        
-        if profile_name not in user.get("profiles", {}):
-            return False, f"Profile '{profile_name}' not found!"
-        
-        if resource_name not in user["profiles"][profile_name]:
-            return False, f"Resource '{resource_name}' not found in profile!"
-        
-        user["profiles"][profile_name].remove(resource_name)
-        self.save_users()
-        return True, f"Resource '{resource_name}' removed from '{profile_name}'!"
+        return profiles.get(profile_name, {})
     
     def delete_user(self, email):
         """Remove user from array. Returns (success, message)"""
@@ -410,6 +507,25 @@ def openeditprofile(current_window, profile_name):
 def signout(current_window):
     UserManager().signout()
     opensignin(current_window)
+
+# Helper
+def smart_open(target):
+    # 1. URL
+    if target.startswith(("http://", "https://")):
+        webbrowser.open(target)
+    
+    # 2. File or Folder
+    else:
+        if platform.system() == "Windows":
+            os.startfile(target)
+        elif platform.system() == "Darwin": # macOS
+            subprocess.Popen(["open", target])
+        else: # Linux
+            subprocess.Popen(["xdg-open", target])
+
+def launch_resources(resources):
+    for resource in resources:
+        smart_open(resource)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

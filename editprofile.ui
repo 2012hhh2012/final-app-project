@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>796</width>
+    <width>804</width>
     <height>602</height>
    </rect>
   </property>
@@ -453,7 +453,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                  <widget class="QLabel" name="label_9">
                   <property name="minimumSize">
                    <size>
-                    <width>60</width>
+                    <width>0</width>
                     <height>0</height>
                    </size>
                   </property>
@@ -466,12 +466,18 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                    <string notr="true">color: #aeb2c0;</string>
                   </property>
                   <property name="text">
-                   <string>Duration</string>
+                   <string>Duration:</string>
                   </property>
                  </widget>
                 </item>
                 <item>
                  <widget class="QLineEdit" name="lineDuration">
+                  <property name="maximumSize">
+                   <size>
+                    <width>30</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
                   <property name="font">
                    <font>
                     <pointsize>10</pointsize>
@@ -479,6 +485,9 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                   </property>
                   <property name="text">
                    <string/>
+                  </property>
+                  <property name="clearButtonEnabled">
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
@@ -620,6 +629,41 @@ QPushButton:pressed {
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="btnDeleteProfile">
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #ff0000, stop:0.5 #cc0000, stop:1 #990000);
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 10px;
+    border: 2px solid #ff4444;
+}
+
+QPushButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #ff3333, stop:0.5 #ee0000, stop:1 #bb0000);
+    border: 2px solid #ff6666;
+}
+
+QPushButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #8b0000, stop:1 #660000);
+    padding-top: 12px;
+    border: 2px solid #ff0000;
+}</string>
+            </property>
+            <property name="text">
+             <string>Delete Profile</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="btnSave">
             <property name="minimumSize">
              <size>
@@ -673,7 +717,7 @@ QPushButton:pressed {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>796</width>
+     <width>804</width>
      <height>21</height>
     </rect>
    </property>

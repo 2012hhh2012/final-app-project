@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>751</width>
-    <height>692</height>
+    <height>714</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -246,6 +246,21 @@ QPushButton:pressed {
      <widget class="QWidget" name="widget_6" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
+        <widget class="QLabel" name="label_10">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: white;</string>
+         </property>
+         <property name="text">
+          <string>-&gt; Settings</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label">
          <property name="font">
           <font>
@@ -255,7 +270,8 @@ QPushButton:pressed {
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: white;</string>
+          <string notr="true">color: white;
+font-weight: bold;</string>
          </property>
          <property name="text">
           <string>Settings</string>

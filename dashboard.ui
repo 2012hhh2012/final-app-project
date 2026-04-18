@@ -250,29 +250,42 @@ QPushButton:pressed {
      <widget class="QWidget" name="widget_3" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="label">
          <property name="font">
           <font>
-           <family>MS Shell Dlg 2</family>
-           <pointsize>22</pointsize>
+           <pointsize>10</pointsize>
           </font>
          </property>
          <property name="styleSheet">
           <string notr="true">color: white;</string>
          </property>
          <property name="text">
+          <string>-&gt; Dashboard</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblGreeting">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: white;
+font-weight: bold;</string>
+         </property>
+         <property name="text">
           <string>&lt;html&gt;
-&lt;head&gt;
-&lt;style&gt;
-p {
-    margin: 0;
-    padding: 0;
-}
-&lt;/style&gt;
-&lt;/head&gt;
+&lt;head/&gt;
 &lt;body&gt;
-&lt;p&gt;Good Morning,&lt;/p&gt;
-&lt;p style=&quot;margin-top: 2px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Architect.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;margin: 0; font-family: 'Segoe UI', 'Inter', sans-serif; font-size: 24pt; font-weight: 800; letter-spacing: -1px;&quot;&gt;
+    &lt;span style=&quot;color: #e0e0e0;&quot;&gt;Good Morning,&lt;/span&gt;
+&lt;/p&gt;
+&lt;p style=&quot;margin: 0; font-family: 'Segoe UI', 'Inter', sans-serif; font-size: 24pt; font-weight: 800; letter-spacing: -1px; margin-top: -8px;&quot;&gt;
+    &lt;span style=&quot;color: #4d8eff;&quot;&gt;Architect&lt;/span&gt;
+&lt;/p&gt;
 &lt;/body&gt;
 &lt;/html&gt;</string>
          </property>
@@ -365,6 +378,21 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     background: none;
 }</string>
          </property>
+         <item>
+          <property name="text">
+           <string>Learn Python</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Editing</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Play Games</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item>
