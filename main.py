@@ -6,6 +6,7 @@ import os
 import webbrowser
 import platform
 import subprocess
+import re
 
 class SigninWindow(QMainWindow):
     def __init__(self, user_manager):
@@ -51,6 +52,18 @@ class SignupWindow(QMainWindow):
 
     def Signup(self):
         if self.linePassword.text() and self.lineUsername.text() and self.lineEmail.text():
+            # Validate email
+            email = self.lineEmail.text()
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                QMessageBox.warning(self, "Warning", "Invalid email format!")
+                return
+              
+            # Validate password length
+            password = self.linePassword.text()
+            if len(password) < 6:
+                QMessageBox.warning(self, "Warning", "Password must be at least 6 characters!")
+                return
+        
             status, message = self.user_manager.add_user(self.lineUsername.text(), self.linePassword.text(), self.lineEmail.text())
             if status:
                 self.clearInputs()
@@ -95,6 +108,7 @@ class DashboardWindow(QMainWindow):
         if self.listQuickAccess.currentItem():
             self.user_manager.push_quick_access_profile_of_current_user(self.listQuickAccess.currentItem().text())
             launch_resources(self.user_manager.get_current_user_profile_resources(self.listQuickAccess.currentItem().text()))
+            self.loadQuickAccess()
         else:
             QMessageBox.warning(self, "Warning", "Please select a profile to launch.")
 
@@ -150,23 +164,31 @@ class ProfilesWindow(QMainWindow):
             QMessageBox.warning(self, "Warning", "Please select a profile to edit.")
 
     def deleteProfile(self):
-        if self.listProfiles.currentItem():
-            status, message = self.user_manager.delete_current_user_profile(self.listProfiles.currentItem().text())
+        reply = QMessageBox.question(
+        self, 
+        "Confirm Delete", 
+        f"Delete profile '{self.listProfiles.currentItem().text()}'?",
+        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+    )
+        if reply == QMessageBox.StandardButton.Yes:
+            profile_name = self.listProfiles.currentItem().text()
+            status, message = self.user_manager.delete_current_user_profile(profile_name)
             if status:
-                self.user_manager.get_current_user()["quickaccess"].remove(self.listProfiles.currentItem().text())
+                # Safely remove from quickaccess
+                current_user = self.user_manager.get_current_user()
+                if current_user and "quickaccess" in current_user:
+                    if profile_name in current_user["quickaccess"]:
+                        current_user["quickaccess"].remove(profile_name)
+                        self.user_manager.save_users()
                 self.loadProfiles()
             else:
                 QMessageBox.warning(self, "Warning", message)
-        else:
-            QMessageBox.warning(self, "Warning", "Please select a profile to delete.")
 
 class EditProfileWindow(QMainWindow):
     def __init__(self, user_manager, profile_name):
         super().__init__()
         uic.loadUi("editprofile.ui", self)
         self.setWindowTitle(f"VibeDock - Editing profile: {profile_name}")
-        self.resources = []
-        self.settings = {}
         self.user_manager = user_manager
         self.profile_name = profile_name
         self.loadProfile()
@@ -196,26 +218,46 @@ class EditProfileWindow(QMainWindow):
     def loadProfile(self):
         if self.user_manager.get_current_user():
             self.user_manager.push_quick_access_profile_of_current_user(self.profile_name)
+
             self.lblProfileName.setText(self.profile_name)
             self.lblHeadingProfileName.setText(self.profile_name)
-            self.listResources.clear()
+            
+            self.settings = {}
             self.settings = self.user_manager.get_current_user_profile(self.profile_name).get("settings", {})
             self.chkFocusTimer.setChecked(self.settings.get("focus_timer", False))
             self.lineDuration.setText(str(self.settings.get("duration", 0)))
+
+            self.resources = []
+            self.listResources.clear()
             self.resources = self.user_manager.get_current_user_profile_resources(self.profile_name)
             for resource in self.resources:
                 self.listResources.addItem(resource)
 
     def deleteProfile(self):
-        status, message = self.user_manager.delete_current_user_profile(self.profile_name)
-        if status:
-            self.user_manager.get_current_user()["quickaccess"].remove(self.profile_name)
-            openprofiles(self)
-        else:
-            QMessageBox.warning(self, "Warning", message)
+        reply = QMessageBox.question(
+            self, 
+            "Confirm Delete", 
+            f"Delete profile '{self.profile_name}'?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            status, message = self.user_manager.delete_current_user_profile(self.profile_name)
+            if status:
+                self.user_manager.get_current_user()["quickaccess"].remove(self.profile_name)
+                openprofiles(self)
+            else:
+                QMessageBox.warning(self, "Warning", message)
 
     def saveProfile(self):
-        self.settings = {"focus_timer": self.chkFocusTimer.isChecked(), "duration": int(self.lineDuration.text())}
+        try:
+            duration = int(self.lineDuration.text())
+            if duration < 0:
+                raise ValueError
+        except ValueError:
+            QMessageBox.warning(self, "Warning", "Duration must be a positive number!")
+            return
+        
+        self.settings = {"focus_timer": self.chkFocusTimer.isChecked(), "duration": duration}
         status, message = self.user_manager.update_current_user_profile(self.profile_name, self.resources, self.settings)
         if status:
             openprofiles(self)
@@ -243,11 +285,18 @@ class SettingsWindow(QMainWindow):
             self.chkMinimizeToTray.setChecked(self.user_manager.get_current_user()["settings"]["MinimizeToTray"])
 
     def deleteAccount(self):
-        status, message = self.user_manager.delete_user(self.user_manager.get_current_user()["email"])
-        if status:
-            opensignup(self)
-        else:
-            QMessageBox.warning(self, "Warning", message)
+        reply = QMessageBox.question(
+            self, 
+            "Confirm Delete", 
+            f"Delete account '{self.user_manager.get_current_username()}'?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            status, message = self.user_manager.delete_user(self.user_manager.get_current_user()["email"])
+            if status:
+                opensignup(self)
+            else:
+                QMessageBox.warning(self, "Warning", message)
 
     def saveAppSettings(self):
         self.user_manager.get_current_user()["settings"]["launchOnStartup"] = self.chkLaunchOnStartup.isChecked()
@@ -256,14 +305,26 @@ class SettingsWindow(QMainWindow):
         QMessageBox.information(self, "Success", "App settings saved successfully!")
 
     def saveAccountCredentials(self):
-        if self.linePassword.text():
-            self.user_manager.get_current_user()["password"] = self.linePassword.text()
-            self.linePassword.clear()
+        # Validate email
         if self.lineEmail.text():
-            self.user_manager.get_current_user()["email"] = self.lineEmail.text()
-            self.user_manager.current_user["email"] = self.lineEmail.text()
-            self.lineEmail.clear()
+            email = self.lineEmail.text()
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                QMessageBox.warning(self, "Warning", "Invalid email format!")
+                return
+            self.user_manager.get_current_user()["email"] = email
+            self.user_manager.current_user["email"] = email
+        
+        # Validate password length
+        if self.linePassword.text():
+            password = self.linePassword.text()
+            if len(password) < 6:
+                QMessageBox.warning(self, "Warning", "Password must be at least 6 characters!")
+                return
+            self.user_manager.get_current_user()["password"] = password
+        
         self.user_manager.save_users()
+        self.lineEmail.clear()
+        self.linePassword.clear()
         QMessageBox.information(self, "Success", "Account credentials saved successfully!")
 
 class UserManager:
@@ -373,7 +434,6 @@ class UserManager:
         
         # Set current user
         self.current_user = user
-        print(self.current_user)
         return True, f"Welcome {user['username']}!"
     
     def signout(self):
@@ -505,13 +565,12 @@ def opensettings(current_window):
     current_window.close()
 
 def openeditprofile(current_window, profile_name):
-    global editprofilewindow
     editprofilewindow = EditProfileWindow(current_window.user_manager, profile_name)
     editprofilewindow.show()
     current_window.close()
 
 def signout(current_window):
-    UserManager().signout()
+    current_window.user_manager.signout()
     opensignin(current_window)
 
 # Helper
@@ -524,10 +583,10 @@ def smart_open(target):
     else:
         if platform.system() == "Windows":
             os.startfile(target)
-        # elif platform.system() == "Darwin": # macOS
-        #     subprocess.Popen(["open", target])
-        # else: # Linux
-        #     subprocess.Popen(["xdg-open", target])
+        elif platform.system() == "Darwin": # macOS
+            subprocess.Popen(["open", target])
+        else: # Linux
+            subprocess.Popen(["xdg-open", target])
 
 def launch_resources(resources):
     for resource in resources:
@@ -540,7 +599,6 @@ if __name__ == "__main__":
     signinwindow = SigninWindow(user_manager)
     dashboardwindow = DashboardWindow(user_manager)
     profileswindow = ProfilesWindow(user_manager)
-    editprofilewindow = EditProfileWindow(user_manager, None)
     settingswindow = SettingsWindow(user_manager)
     signinwindow.show()
     app.exec()
