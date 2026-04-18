@@ -229,7 +229,8 @@ class EditProfileWindow(QMainWindow):
 
             self.resources = []
             self.listResources.clear()
-            self.resources = self.user_manager.get_current_user_profile_resources(self.profile_name)
+            original_resources = self.user_manager.get_current_user_profile_resources(self.profile_name)
+            self.resources = original_resources.copy()
             for resource in self.resources:
                 self.listResources.addItem(resource)
 
