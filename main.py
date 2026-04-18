@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QInputDialog
+from PyQt6.QtGui import QIcon
 from PyQt6 import uic
 import sys
 import json
@@ -608,6 +609,7 @@ def launch_resources(current_window, resources):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("vibedockicon.png"))
     user_manager = UserManager("users-data.json")
     signupwindow = SignupWindow(user_manager)
     signinwindow = SigninWindow(user_manager)

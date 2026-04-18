@@ -36,11 +36,20 @@ color: white;</string>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <widget class="QLabel" name="label_8">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
             <property name="text">
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap>D:/Downloads/image (1) (1).png</pixmap>
+             <pixmap>vibedockicon.png</pixmap>
             </property>
            </widget>
           </item>
