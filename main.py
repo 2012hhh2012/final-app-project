@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QInputDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QInputDialog, QFileDialog
 from PyQt6.QtGui import QIcon
 from PyQt6 import uic
 import sys
@@ -190,7 +190,8 @@ class EditProfileWindow(QMainWindow):
         self.btnSignOut.clicked.connect(lambda: signout(self))
         self.btnDeleteProfile.clicked.connect(self.deleteProfile)
         self.btnSave.clicked.connect(self.saveProfile)
-        self.btnAddResource.clicked.connect(self.addResource)
+        self.btnAddURL.clicked.connect(self.addURL)
+        self.btnBrowseResource.clicked.connect(self.browseResource)
         self.btnDeleteResource.clicked.connect(self.deleteResource)
 
         self.listResources.setAcceptDrops(True)
@@ -198,11 +199,26 @@ class EditProfileWindow(QMainWindow):
         self.listResources.dragMoveEvent = self.drag_move_event
         self.listResources.dropEvent = self.drop_event
 
-    def addResource(self):
-        resource, ok = QInputDialog.getText(self, "Add Resource", "Enter resource (file path, url):")
-        if ok and resource:
-            self.resources.append(resource)
-            self.listResources.addItem(resource)
+    def addURL(self):
+        url, ok = QInputDialog.getText(self, "Add URL", "Enter URL:")
+        if ok and url:
+            if url.startswith(("http://", "https://", "ftp://")):
+                self.resources.append(url)
+                self.listResources.addItem(url)
+            else:
+                QMessageBox.warning(self, "Warning", "Please enter a valid URL.")
+
+    def browseResource(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select File",
+            "",  # Start directory (empty = last used)
+            "All Files (*.*)"
+        )
+        if file_path:
+            # Add the selected file to resources
+            self.resources.append(file_path)
+            self.listResources.addItem(file_path)
 
     def deleteResource(self):
         if self.listResources.currentItem():
@@ -342,7 +358,7 @@ class UserManager:
                     self.users = json.load(file)
                 print(f"Loaded {len(self.users)} users from {self.filename}")
             except json.JSONDecodeError:
-                print(f"Error reading {self.filename}, creating new file")
+                print(f"Error reading {self.filename}, Emptying it")
                 self.users = []
                 self.save_users()
             except Exception as e:
@@ -560,7 +576,7 @@ def is_valid_resource(resource):
 
 def smart_open(target):
     # 1. URL
-    if target.startswith(("http://", "https://")):
+    if target.startswith(("http://", "https://", "ftp://")):
         webbrowser.open(target)
         return True, ""
 
@@ -570,7 +586,17 @@ def smart_open(target):
     # 2. File or Folder
     else:
         if platform.system() == "Windows":
-            os.startfile(target)
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESTDHANDLES
+            
+            subprocess.Popen(
+                f'start "" "{target}"',
+                shell=True,
+                startupinfo=startupinfo,
+                creationflags=subprocess.DETACHED_PROCESS,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
         elif platform.system() == "Darwin": # macOS
             subprocess.Popen(["open", target])
         else: # Linux

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>780</width>
-    <height>626</height>
+    <width>774</width>
+    <height>616</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -245,7 +245,7 @@ QPushButton:pressed {
     </item>
     <item>
      <widget class="QWidget" name="widget_6" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QWidget" name="widget_2" native="true">
          <property name="minimumSize">
@@ -314,37 +314,88 @@ font-weight: bold;
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_4">
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: white;
+        <widget class="QWidget" name="widget_4" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: white;
 font-weight: bold;
 </string>
-         </property>
-         <property name="text">
-          <string>Resources</string>
-         </property>
+            </property>
+            <property name="text">
+             <string>Resources</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnDeleteProfile">
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #ff0000, stop:0.5 #cc0000, stop:1 #990000);
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 10px;
+    border: 2px solid #ff4444;
+}
+
+QPushButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #ff3333, stop:0.5 #ee0000, stop:1 #bb0000);
+    border: 2px solid #ff6666;
+}
+
+QPushButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #8b0000, stop:1 #660000);
+    padding-top: 12px;
+    border: 2px solid #ff0000;
+}</string>
+            </property>
+            <property name="text">
+             <string>Delete Profile</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="widget_3" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QListWidget" name="listResources">
-            <property name="minimumSize">
-             <size>
-              <width>200</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QListWidget {
+        <widget class="QListWidget" name="listResources">
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QListWidget {
     background-color: #2b2b2b;
     border: 1px solid #3c3c3c;
     border-radius: 5px;
@@ -391,15 +442,12 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     border: none;
     background: none;
 }</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QWidget" name="widget_5" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
@@ -414,7 +462,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="btnAddResource">
+           <widget class="QPushButton" name="btnAddURL">
             <property name="font">
              <font>
               <pointsize>9</pointsize>
@@ -444,7 +492,42 @@ QPushButton:pressed {
 }</string>
             </property>
             <property name="text">
-             <string>+ Add Resoure</string>
+             <string>+ Add URL</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnBrowseResource">
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #adc6ff, stop:1 #4d8eff);
+    color: #00285d;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 10px;
+    border: none;
+}
+
+QPushButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #c2d5ff, stop:1 #66a1ff);
+    color: #001a3d;
+}
+
+QPushButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #8aa9ff, stop:1 #3b76e0);
+    padding-left: 12px;
+    padding-top: 12px;
+}</string>
+            </property>
+            <property name="text">
+             <string>📁 Browse Resoure</string>
             </property>
            </widget>
           </item>
@@ -496,41 +579,6 @@ QPushButton:pressed {
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnDeleteProfile">
-            <property name="font">
-             <font>
-              <pointsize>9</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #ff0000, stop:0.5 #cc0000, stop:1 #990000);
-    color: #ffffff;
-    font-weight: bold;
-    border-radius: 8px;
-    padding: 10px;
-    border: 2px solid #ff4444;
-}
-
-QPushButton:hover {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #ff3333, stop:0.5 #ee0000, stop:1 #bb0000);
-    border: 2px solid #ff6666;
-}
-
-QPushButton:pressed {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #8b0000, stop:1 #660000);
-    padding-top: 12px;
-    border: 2px solid #ff0000;
-}</string>
-            </property>
-            <property name="text">
-             <string>Delete Profile</string>
-            </property>
-           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btnSave">
@@ -586,7 +634,7 @@ QPushButton:pressed {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>780</width>
+     <width>774</width>
      <height>21</height>
     </rect>
    </property>
