@@ -17,8 +17,6 @@ class SigninWindow(QMainWindow):
         self.user_manager = user_manager
         self.btnSignUp.clicked.connect(lambda: opensignup(self))
         self.btnSignIn.clicked.connect(self.Signin)
-        self.btnGoogle.clicked.connect(self.showUnavailable)
-        self.btnGithub.clicked.connect(self.showUnavailable)
 
     def Signin(self):
         if self.linePassword.text() and self.lineEmail.text():
@@ -37,9 +35,6 @@ class SigninWindow(QMainWindow):
         self.linePassword.clear()
         self.lineEmail.clear()
 
-    def showUnavailable(self):
-        QMessageBox.information(self, "Sorry", "This Signin method is unavailable.")
-
 class SignupWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
@@ -48,8 +43,6 @@ class SignupWindow(QMainWindow):
         self.user_manager = user_manager
         self.btnSignIn.clicked.connect(lambda: opensignin(self))
         self.btnSignUp.clicked.connect(self.Signup)
-        self.btnGoogle.clicked.connect(self.showUnavailable)
-        self.btnGithub.clicked.connect(self.showUnavailable)
 
     def Signup(self):
         if self.linePassword.text() and self.lineUsername.text() and self.lineEmail.text():
@@ -80,9 +73,6 @@ class SignupWindow(QMainWindow):
         self.linePassword.clear()
         self.lineEmail.clear()
         self.lineUsername.clear()
-
-    def showUnavailable(self):
-        QMessageBox.information(self, "Sorry", "This Signup method is unavailable.")
 
 class DashboardWindow(QMainWindow):
     def __init__(self, user_manager):
@@ -203,6 +193,11 @@ class EditProfileWindow(QMainWindow):
         self.btnAddResource.clicked.connect(self.addResource)
         self.btnDeleteResource.clicked.connect(self.deleteResource)
 
+        self.listResources.setAcceptDrops(True)
+        self.listResources.dragEnterEvent = self.drag_enter_event
+        self.listResources.dragMoveEvent = self.drag_move_event
+        self.listResources.dropEvent = self.drop_event
+
     def addResource(self):
         resource, ok = QInputDialog.getText(self, "Add Resource", "Enter resource (file path, url):")
         if ok and resource:
@@ -222,11 +217,6 @@ class EditProfileWindow(QMainWindow):
 
             self.lblProfileName.setText(self.profile_name)
             self.lblHeadingProfileName.setText(self.profile_name)
-            
-            self.settings = {}
-            self.settings = self.user_manager.get_current_user_profile(self.profile_name).get("settings", {})
-            self.chkFocusTimer.setChecked(self.settings.get("focus_timer", False))
-            self.lineDuration.setText(str(self.settings.get("duration", 0)))
 
             self.resources = []
             self.listResources.clear()
@@ -250,21 +240,34 @@ class EditProfileWindow(QMainWindow):
             else:
                 QMessageBox.warning(self, "Warning", message)
 
-    def saveProfile(self):
-        try:
-            duration = int(self.lineDuration.text())
-            if duration < 0:
-                raise ValueError
-        except ValueError:
-            QMessageBox.warning(self, "Warning", "Duration must be a positive number!")
-            return
-        
-        self.settings = {"focus_timer": self.chkFocusTimer.isChecked(), "duration": duration}
-        status, message = self.user_manager.update_current_user_profile(self.profile_name, self.resources, self.settings)
+    def saveProfile(self):        
+        status, message = self.user_manager.update_current_user_profile(self.profile_name, self.resources)
         if status:
             openprofiles(self)
         else:
             QMessageBox.warning(self, "Warning", message)
+
+    def drag_enter_event(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+    def drag_move_event(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()  # This allows the drop to happen
+        else:
+            event.ignore()
+
+    def drop_event(self, event):
+        urls = event.mimeData().urls()
+        for url in urls:
+            path = url.toLocalFile()
+            if path:
+                self.resources.append(path)
+                self.listResources.addItem(path)
+
+        event.accept()
 
 class SettingsWindow(QMainWindow):
     def __init__(self, user_manager):
@@ -272,19 +275,12 @@ class SettingsWindow(QMainWindow):
         uic.loadUi("settings.ui", self)
         self.setWindowTitle("VibeDock - Settings")
         self.user_manager = user_manager
-        self.loadAppSettings()
         self.lblUsername.setText(f"Username: {self.user_manager.get_current_username()}")
         self.btnDashboard.clicked.connect(lambda: opendashboard(self))
         self.btnProfiles.clicked.connect(lambda: openprofiles(self))
         self.btnSideSignOut.clicked.connect(lambda: signout(self))
         self.btnDeleteAccount.clicked.connect(self.deleteAccount)
-        self.btnAppSave.clicked.connect(self.saveAppSettings)
         self.btnAccountSave.clicked.connect(self.saveAccountCredentials)
-
-    def loadAppSettings(self):
-        if self.user_manager.get_current_user():
-            self.chkLaunchOnStartup.setChecked(self.user_manager.get_current_user()["settings"]["launchOnStartup"])
-            self.chkMinimizeToTray.setChecked(self.user_manager.get_current_user()["settings"]["MinimizeToTray"])
 
     def deleteAccount(self):
         reply = QMessageBox.question(
@@ -299,12 +295,6 @@ class SettingsWindow(QMainWindow):
                 opensignup(self)
             else:
                 QMessageBox.warning(self, "Warning", message)
-
-    def saveAppSettings(self):
-        self.user_manager.get_current_user()["settings"]["launchOnStartup"] = self.chkLaunchOnStartup.isChecked()
-        self.user_manager.get_current_user()["settings"]["MinimizeToTray"] = self.chkMinimizeToTray.isChecked()
-        self.user_manager.save_users()
-        QMessageBox.information(self, "Success", "App settings saved successfully!")
 
     def saveAccountCredentials(self):
         # Validate email
@@ -385,10 +375,6 @@ class UserManager:
             "username": username,
             "password": password,
             "email": email,
-            "settings": {
-                "launchOnStartup": False,
-                "MinimizeToTray": False
-            },
             "profiles": {},
             "quickaccess": []
         }
@@ -463,13 +449,7 @@ class UserManager:
             return False, f"Profile '{profile_name}' already exists!"
         
         # Add the new profile with empty resources array
-        user["profiles"][profile_name] = {
-            "resources": [],
-            "settings": {
-                "focus_timer": False,
-                "duration": 0
-            }
-        }
+        user["profiles"][profile_name] = {"resources": []}
         
         # Update current_user reference
         self.current_user = user
@@ -501,7 +481,7 @@ class UserManager:
         profile = user.get("profiles", {}).get(profile_name, {})
         return profile.get("resources", [])
     
-    def update_current_user_profile(self, profile_name, resource_list, settings):
+    def update_current_user_profile(self, profile_name, resource_list):
         user = self.current_user
         if not user:
             return False, "No user is currently logged in!"
@@ -510,7 +490,6 @@ class UserManager:
             return False, f"Profile '{profile_name}' not found!"
         
         user["profiles"][profile_name]["resources"] = resource_list
-        user["profiles"][profile_name]["settings"] = settings
         self.save_users()
         return True, f"Profile '{profile_name}' updated successfully!"
     
@@ -605,7 +584,8 @@ def launch_resources(current_window, resources):
         status, message = smart_open(resource)
         if not status:
             fail_resources.append(resource)
-    QMessageBox.warning(current_window, "Warning", f"Failed to open the following resources:\n{'\n'.join(fail_resources)}")
+    if fail_resources:
+        QMessageBox.warning(current_window, "Warning", f"Failed to open the following resources:\n{'\n'.join(fail_resources)}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

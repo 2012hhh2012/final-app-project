@@ -289,51 +289,6 @@ QPushButton:pressed {
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_7">
-         <property name="styleSheet">
-          <string notr="true">color: white;</string>
-         </property>
-         <property name="text">
-          <string>Or continue with</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="widget_2" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QPushButton" name="btnGoogle">
-            <property name="styleSheet">
-             <string notr="true">background-color: #2a2a2a;
-color: white;
-border-radius: 5;
-padding: 6;</string>
-            </property>
-            <property name="text">
-             <string>Google</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnGithub">
-            <property name="styleSheet">
-             <string notr="true">background-color: #2a2a2a;
-color: white;
-border-radius: 5;
-padding: 6;</string>
-            </property>
-            <property name="text">
-             <string>Github</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <widget class="QWidget" name="widget_3" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
