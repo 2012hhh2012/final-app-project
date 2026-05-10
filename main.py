@@ -165,12 +165,15 @@ class ProfilesWindow(QMainWindow):
             QMessageBox.warning(self, "Warning", "Please select a profile to edit.")
 
     def deleteProfile(self):
+        if not self.listProfiles.currentItem():
+            return QMessageBox.warning(self, "Warning", "Please select a profile to delete.")
+
         reply = QMessageBox.question(
-        self, 
-        "Confirm Delete", 
-        f"Delete profile '{self.listProfiles.currentItem().text()}'?",
-        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-    )
+            self, 
+            "Confirm Delete", 
+            f"Delete profile '{self.listProfiles.currentItem().text()}'?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
         if reply == QMessageBox.StandardButton.Yes:
             profile_name = self.listProfiles.currentItem().text()
             status, message = self.user_manager.delete_current_user_profile(profile_name)
