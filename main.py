@@ -9,10 +9,20 @@ import platform
 import subprocess
 import re
 
+def resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
+
 class SigninWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
-        uic.loadUi("signin.ui", self)
+        uic.loadUi(resource_path("signin.ui"), self)
         self.setWindowTitle("VibeDock - Signin")
         self.user_manager = user_manager
         self.btnSignUp.clicked.connect(lambda: opensignup(self))
@@ -38,7 +48,7 @@ class SigninWindow(QMainWindow):
 class SignupWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
-        uic.loadUi("signup.ui", self)
+        uic.loadUi(resource_path("signup.ui"), self)
         self.setWindowTitle("VibeDock - Signup")
         self.user_manager = user_manager
         self.btnSignIn.clicked.connect(lambda: opensignin(self))
@@ -77,7 +87,7 @@ class SignupWindow(QMainWindow):
 class DashboardWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
-        uic.loadUi("dashboard.ui", self)
+        uic.loadUi(resource_path("dashboard.ui"), self)
         self.setWindowTitle("VibeDock - Dashboard")
         self.user_manager = user_manager
         self.loadQuickAccess()
@@ -113,7 +123,7 @@ class DashboardWindow(QMainWindow):
 class ProfilesWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
-        uic.loadUi("profiles.ui", self)
+        uic.loadUi(resource_path("profiles.ui"), self)
         self.setWindowTitle("VibeDock - Profiles")
         self.user_manager = user_manager
         self.loadProfiles()
@@ -178,7 +188,7 @@ class ProfilesWindow(QMainWindow):
 class EditProfileWindow(QMainWindow):
     def __init__(self, user_manager, profile_name):
         super().__init__()
-        uic.loadUi("editprofile.ui", self)
+        uic.loadUi(resource_path("editprofile.ui"), self)
         self.setWindowTitle(f"VibeDock - Editing profile: {profile_name}")
         self.user_manager = user_manager
         self.profile_name = profile_name
@@ -288,7 +298,7 @@ class EditProfileWindow(QMainWindow):
 class SettingsWindow(QMainWindow):
     def __init__(self, user_manager):
         super().__init__()
-        uic.loadUi("settings.ui", self)
+        uic.loadUi(resource_path("settings.ui"), self)
         self.setWindowTitle("VibeDock - Settings")
         self.user_manager = user_manager
         self.lblUsername.setText(f"Username: {self.user_manager.get_current_username()}")
@@ -373,7 +383,7 @@ class UserManager:
             self.save_users()
     
     def save_users(self):
-        """Save users array to JSON file"""
+        """Save users arr-ay to JSON file"""
         with open(self.filename, "w") as file:
             json.dump(self.users, file, indent=4)
     
@@ -616,7 +626,7 @@ def launch_resources(current_window, resources):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon("vibedockicon.png"))
+    app.setWindowIcon(QIcon(resource_path("vibedockicon.png")))
     user_manager = UserManager("users-data.json")
     signupwindow = SignupWindow(user_manager)
     signinwindow = SigninWindow(user_manager)

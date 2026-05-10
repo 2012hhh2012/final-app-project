@@ -1,3 +1,6 @@
 users-data.json
 venv/
 .vscode/
+build/
+dist/
+*.spec
